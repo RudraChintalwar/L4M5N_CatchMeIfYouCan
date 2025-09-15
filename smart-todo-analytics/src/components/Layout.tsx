@@ -13,10 +13,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <main className="max-w-5xl mx-auto p-4">
         <div className="grid grid-cols-4 gap-6">
-          <aside className="col-span-1 bg-white p-4 rounded-lg shadow-sm">
-            <h2 className="font-medium">Projects</h2>
-            {/* later: project list */}
+          <aside className="col-span-1 bg-white p-4 rounded-lg shadow-sm space-y-2">
+            <h2 className="font-medium">Menu</h2>
+            <nav className="flex flex-col gap-2 text-sm">
+                <a href="/" className="hover:text-indigo-600">Tasks</a>
+                <a href="/analytics" className="hover:text-indigo-600">Analytics</a>
+            </nav>
           </aside>
+
 
           <section className="col-span-3 bg-white p-6 rounded-lg shadow-sm">
             {children}

@@ -1,18 +1,35 @@
+// src/app/page.tsx
+"use client";
+import { useState } from "react";
 import Layout from "@/components/Layout";
+import AuthGuard from "@/components/AuthGuard";
+import CreateTaskModal from "@/components/CreateTaskModal";
+import TaskList from "@/components/TaskList";
 
 export default function Page() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Tasks</h2>
-          <div className="text-sm text-gray-500">Welcome — add tasks to get analytics</div>
+    <AuthGuard>
+      <Layout>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <p className="text-sm text-gray-500">Manage your tasks</p>
+          </div>
+
+          <button
+            onClick={() => setOpen(true)}
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
+          >
+            + New Task
+          </button>
         </div>
 
-        <div className="border-dashed border-2 border-gray-200 rounded p-8 text-center text-gray-500">
-          Empty task list — we'll add CRUD in Phase 2
-        </div>
-      </div>
-    </Layout>
+        <TaskList />
+
+        <CreateTaskModal isOpen={open} onClose={() => setOpen(false)} />
+      </Layout>
+    </AuthGuard>
   );
 }
