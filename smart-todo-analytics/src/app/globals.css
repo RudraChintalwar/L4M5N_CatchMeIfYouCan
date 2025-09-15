@@ -1,26 +1,46 @@
 @import "tailwindcss";
 
+/* Define theme variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* text will be black by default */
+  --foreground: #000000;
+
+  /* cosmic gradient background */
+  --background: radial-gradient(circle at 30% 30%, #d6d6f5 0%, #b3b3ff 40%, #f5d6ff 100%);
 }
 
+/* Tailwind inline theme hook */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
+/* Optional: still support dark mode swap */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* text still black or you can invert */
+    --foreground: #000000;
+    --background: radial-gradient(circle at 30% 30%, #cfcfff 0%, #b3b3ff 40%, #f5d6ff 100%);
   }
 }
 
+/* Apply globally */
+html,
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  background-attachment: fixed; /* keep gradient fixed on scroll */
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Make links/buttons inherit black text too */
+a,
+button,
+input,
+select,
+textarea {
+  color: inherit;
 }
