@@ -1,12 +1,12 @@
 // src/components/Chatbot.tsx
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Msg = { role: "user" | "bot"; text: string };
 
 interface ChatbotProps {
-  tasks: string[]; // or titles list
+  tasks: string[];
   selectedTask?: any;
 }
 
@@ -17,7 +17,6 @@ export default function Chatbot({ tasks, selectedTask }: ChatbotProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // auto-scroll on new message
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
@@ -69,7 +68,6 @@ export default function Chatbot({ tasks, selectedTask }: ChatbotProps) {
     }
   };
 
-  // Render either a nicely parsed numbered list or a plain preformatted block
   const renderBotText = (text: string) => {
     const lines = text
       .split(/\r?\n/)
@@ -81,58 +79,86 @@ export default function Chatbot({ tasks, selectedTask }: ChatbotProps) {
       return (
         <ol className="list-decimal list-inside text-sm space-y-2">
           {lines.map((l, i) => (
-            <li key={i}>{l.replace(/^\d+\.\s+/, "")}</li>
+            <motion.li 
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              {l.replace(/^\d+\.\s+/, "")}
+            </motion.li>
           ))}
         </ol>
       );
     }
 
-    // otherwise show as pre (preserve newlines)
     return <pre className="whitespace-pre-wrap text-sm">{text}</pre>;
   };
 
   return (
-    <div className="bg-gray-800 rounded-2xl shadow-lg p-4 w-full max-w-2xl">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-bold">🤖 Task Assistant</h2>
-        <div className="text-xs text-gray-400">
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-2xl border border-gray-700">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            🤖
+          </motion.div>
+          Task Assistant
+        </h2>
+        <div className="text-xs px-3 py-1 bg-purple-900/30 text-purple-300 rounded-full border border-purple-700/50">
           {selectedTask ? selectedTask.title : "Select a task to start"}
         </div>
       </div>
 
-      <div className="text-xs text-gray-400 mb-3">
-        Tip: ask for a step-by-step plan (e.g. "Plan how to finish this in 2 days")
+      <div className="text-xs text-gray-400 mb-4 p-3 bg-gray-800/50 rounded-lg">
+        💡 Tip: ask for a step-by-step plan (e.g. "Plan how to finish this in 2 days")
       </div>
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-auto space-y-2 mb-3 max-h-64 pr-2"
+        className="flex-1 overflow-auto space-y-3 mb-4 max-h-64 pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
       >
-        {messages.map((m, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15 }}
-            className={`p-2 rounded-lg max-w-[90%] ${
-              m.role === "user"
-                ? "bg-indigo-600 text-white ml-auto text-right"
-                : "bg-gray-700 text-white text-left"
-            }`}
-          >
-            {m.role === "bot" ? renderBotText(m.text) : <div>{m.text}</div>}
-          </motion.div>
-        ))}
+        <AnimatePresence>
+          {messages.map((m, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className={`p-3 rounded-xl max-w-[85%] ${
+                m.role === "user"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white ml-auto"
+                  : "bg-gray-700 text-white"
+              }`}
+            >
+              {m.role === "bot" ? renderBotText(m.text) : <div>{m.text}</div>}
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {loading && (
-          <div className="text-sm text-gray-300">Thinking…</div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-sm text-gray-300 flex items-center gap-2"
+          >
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+            </div>
+            Thinking…
+          </motion.div>
         )}
       </div>
 
       <div className="flex gap-2">
         <input
           aria-label="Ask about selected task"
-          className="flex-1 p-2 rounded-lg text-black"
+          className="flex-1 p-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
           placeholder={
             selectedTask ? "Ask for a step-by-step plan..." : "Select a task first"
           }
@@ -146,17 +172,25 @@ export default function Chatbot({ tasks, selectedTask }: ChatbotProps) {
           }}
           disabled={!selectedTask || loading}
         />
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={sendMessage}
-          className={`px-3 rounded-lg ${
+          className={`p-3 rounded-xl ${
             selectedTask && !loading
-              ? "bg-blue-500 hover:bg-blue-600"
-              : "bg-gray-600 cursor-not-allowed"
-          } text-white`}
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-lg"
+              : "bg-gray-700 cursor-not-allowed"
+          } text-white transition-all`}
           disabled={!selectedTask || loading}
         >
-          {loading ? "…" : "Send"}
-        </button>
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          )}
+        </motion.button>
       </div>
     </div>
   );

@@ -1,23 +1,18 @@
+// src/components/PrioritizedTaskList.tsx
 "use client";
 import { useTasks } from "@/hooks/useTasks";
 import dayjs from "dayjs";
+import { motion } from "framer-motion";
 
-/**
- * We normalise the tasks here to make sure score is a number
- * and Firestore Timestamps are converted to JS Date.
- */
 export default function PrioritizedTaskList() {
   const { prioritizedTasks } = useTasks();
 
-  // convert each task's dueAt + importance to usable values
   const normalized = prioritizedTasks.map((t) => {
-    // Firestore Timestamp → JS Date
     const dueDate =
       t.dueAt && typeof (t.dueAt as any).toDate === "function"
         ? (t.dueAt as any).toDate()
         : t.dueAt;
 
-    // map importance string to numeric score
     let importanceValue = 1;
     if (typeof t.importance === "string") {
       const imp = t.importance.toLowerCase();
@@ -28,7 +23,6 @@ export default function PrioritizedTaskList() {
       importanceValue = Number(t.importance) || 1;
     }
 
-    // compute scores
     const importanceScore = importanceValue * 5;
     let dueScore = 0;
     if (dueDate) {
@@ -44,28 +38,40 @@ export default function PrioritizedTaskList() {
   });
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-xl font-bold mb-2">Recommended Order</h2>
-      {normalized.map((t) => (
-        <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-4"
+    >
+      <h2 className="text-2xl font-bold text-white mb-4">Recommended Order</h2>
+      {normalized.map((t, index) => (
+        <motion.div
           key={t.id}
-          className="p-4 bg-gray-900 text-white rounded-xl shadow-md flex justify-between"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.1 }}
+          whileHover={{ scale: 1.02 }}
+          className="p-5 bg-gradient-to-r from-purple-900/50 to-indigo-900/50 rounded-2xl shadow-lg border border-purple-700/30 flex justify-between items-center backdrop-blur-sm"
         >
-          <div>
-            <div className="font-semibold">{t.title}</div>
+          <div className="flex-1">
+            <div className="font-semibold text-white text-lg">{t.title}</div>
             {t.description && (
-              <div className="text-sm text-gray-400">{t.description}</div>
+              <div className="text-sm text-purple-200 mt-1">{t.description}</div>
             )}
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-purple-300 mt-2">
               Importance: {t.importance}{" "}
               {t.dueAt && `| Due: ${dayjs(t.dueAt).format("DD MMM")}`}
             </div>
           </div>
-          <div className="text-sm font-semibold text-indigo-400">
-            Score: {t.score.toFixed(0)}
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+              Score: {t.score.toFixed(0)}
+            </div>
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
