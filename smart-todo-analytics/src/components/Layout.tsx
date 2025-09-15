@@ -18,6 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <nav className="flex flex-col gap-2 text-sm">
                 <a href="/" className="hover:text-indigo-600">Tasks</a>
                 <a href="/analytics" className="hover:text-indigo-600">Analytics</a>
+                <a href="/chat" className="hover:text-indigo-600">Chatbot for Tasks</a>
             </nav>
           </aside>
 
