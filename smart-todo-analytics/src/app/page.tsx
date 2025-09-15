@@ -5,6 +5,7 @@ import Layout from "@/components/Layout";
 import AuthGuard from "@/components/AuthGuard";
 import CreateTaskModal from "@/components/CreateTaskModal";
 import TaskList from "@/components/TaskList";
+import PrioritizedTaskList from "@/components/PrioritizedTaskList"; // 👈 import our new component
 
 export default function Page() {
   const [open, setOpen] = useState(false);
@@ -26,6 +27,12 @@ export default function Page() {
           </button>
         </div>
 
+        {/* 👇 recommended order appears above the normal task list */}
+        <div className="mb-10">
+          <PrioritizedTaskList />
+        </div>
+
+        {/* existing list of tasks */}
         <TaskList />
 
         <CreateTaskModal isOpen={open} onClose={() => setOpen(false)} />

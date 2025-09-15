@@ -3,6 +3,8 @@
 
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
+import { useMemo } from "react";
+import dayjs from "dayjs";
 import {
   collection,
   query,
@@ -129,5 +131,25 @@ export function useTasks() {
     });
   };
 
-  return { tasks, addTask, toggleComplete, removeTask, updateTask };
+  const prioritizedTasks = useMemo(() => {
+  const now = dayjs();
+  return tasks
+    .filter((t) => !t.completed) // only incomplete tasks
+    .map((t) => {
+      // compute urgency score
+      let dueScore = 0;
+      if (t.dueAt) {
+        const daysUntil = dayjs(t.dueAt).diff(now, "day");
+        // tasks due sooner => bigger score
+        dueScore = daysUntil <= 0 ? 50 : Math.max(0, 30 - daysUntil); // max 30 points
+      }
+      // importance is 1–10 or 1–5 scale
+      const importanceScore = Number(t.importance) * 5;
+// up to 50 points
+      return { ...t, score: importanceScore + dueScore };
+    })
+    .sort((a, b) => b.score - a.score); // higher score first
+}, [tasks]);
+
+  return { tasks, addTask, toggleComplete, removeTask, updateTask, prioritizedTasks, };
 }
